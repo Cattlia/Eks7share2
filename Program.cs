@@ -1,4 +1,5 @@
 using E7Kont.Models;
+using E7Kont.Services;
 using E7Kont.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 
 builder.Services.AddScoped<INoteService, NoteService>();
+builder.Services.AddScoped<IFolderService, FolderService>();
 builder.Services.AddScoped<INoteRepository, NoteRepository>();
+builder.Services.AddScoped<IFolderRepository, FolderRepository>();
 
 //builder.Services.Configure<ApiBehaviorOptions>(options =>
 //{
@@ -41,6 +44,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.EnsureCreated(); 
+}
+
+
 
 app.MapControllers();
 app.UseHttpsRedirection();

@@ -1,38 +1,48 @@
 using System.Collections.Generic;
 using System.Linq;
 using E7Kont.Models;
+using E7Kont.Repositories;
 
 public class FolderService : IFolderService
 {
-    private static readonly List<Folder> Folders = new()
+    
+    private readonly IFolderRepository _folderRepository;
+
+    
+    public FolderService(IFolderRepository folderRepository)
     {
-        new Folder { Id = 1, Name = "Hverdagshandling", Notes = new List<Note>() },
-        new Folder { Id = 2, Name = "Ukeshandling", Notes = new List<Note>() },
-        new Folder { Id = 3, Name = "SkalHandles", Notes = new List<Note>() }
-    };
+        _folderRepository = folderRepository;
+    }
 
-    public IEnumerable<Folder> GetFolders() => Folders;
+    
+    public IEnumerable<Folder> GetFolders()
+    {
+        return _folderRepository.GetAllFolders().ToList();
+    }
 
-    public Folder GetFolderById(int id) => Folders.FirstOrDefault(f => f.Id == id) ?? new Folder();
+    
+    public Folder? GetFolderById(int id)
+    {
+        return _folderRepository.GetFolderById(id);
+    }
 
+  
     public void AddFolder(Folder folder)
     {
-        folder.Id = Folders.Max(f => f.Id) + 1;
-        Folders.Add(folder);
+        _folderRepository.AddFolder(folder);
     }
 
+    
     public void UpdateFolder(int id, Folder updatedFolder)
     {
-        var folder = GetFolderById(id);
-        if (folder == null) return;
-
-        folder.Name = updatedFolder.Name;
-        folder.Notes = updatedFolder.Notes; 
+        // CHANGE: Added ID mismatch check for safety
+        if (updatedFolder.Id != id) throw new ArgumentException("Folder ID mismatch");
+        _folderRepository.UpdateFolder(updatedFolder);
     }
 
+    
     public void DeleteFolder(int id)
     {
-        var folder = GetFolderById(id);
-        if (folder != null) Folders.Remove(folder);
+        _folderRepository.DeleteFolder(id);
     }
 }

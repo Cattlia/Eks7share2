@@ -1,6 +1,3 @@
-
-
-/*
 using System.ComponentModel.DataAnnotations;
 
 public class LoggingMiddleware
@@ -25,4 +22,3 @@ public class LoggingMiddleware
 
 }
 
-*/ 

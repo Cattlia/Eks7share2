@@ -1,13 +1,14 @@
+// Controllers/FoldersController.cs
 using E7Kont.Models;
+using E7Kont.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E7Kont.Controllers
-
-{   
-    [ApiController, Route("api/[controller]")]
+{
+    [Route("api/[controller]")]
+    [ApiController]
     public class FoldersController : ControllerBase
     {
-        
         private readonly IFolderService _folderService;
 
         public FoldersController(IFolderService folderService)
@@ -15,67 +16,42 @@ namespace E7Kont.Controllers
             _folderService = folderService;
         }
 
-        //GET: api/Folder
         [HttpGet]
-        public ActionResult<IEnumerable<Folder>> GetFolder()
+        public IActionResult GetAll()
         {
             var folders = _folderService.GetFolders();
             return Ok(folders);
         }
 
-        // GET: api/Folder/{id}
         [HttpGet("{id}")]
-        public ActionResult<IEnumerable<Folder>> GetFolder(int id)
+        public IActionResult GetById(int id)
         {
-            var Folder = _folderService.GetFolderById(id);
-            if (Folder == null)
-            {
-                NotFound();
-            }
-            return Ok(Folder);
+            var folder = _folderService.GetFolderById(id);
+            if (folder == null) return NotFound();
+            return Ok(folder);
         }
-    
+
         [HttpPost]
-        public ActionResult<Folder> CreateFolder(Folder newFolder)
+        public IActionResult Create([FromBody] Folder folder)
         {
-            //if(!ModelState.IsValid)
-            //{
-            //    return BadRequest(ModelState);
-            //}
-            _folderService.AddFolder(newFolder);
-            return CreatedAtAction(nameof(GetFolder), new {id = newFolder.Id}, newFolder);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            _folderService.AddFolder(folder);
+            return CreatedAtAction(nameof(GetById), new { id = folder.Id }, folder);
         }
 
-        //PUT: api/Folder/{id}
         [HttpPut("{id}")]
-        public ActionResult UpdateFolder(int id, Folder updatedFolder)
+        public IActionResult Update(int id, [FromBody] Folder folder)
         {
-            var existingFolder = _folderService.GetFolderById(id);
-            if(existingFolder == null)
-            {
-                return NotFound();
-            }
-            
-            _folderService.UpdateFolder(id, updatedFolder);
-
-            return NoContent();
+            if (!ModelState.IsValid || id != folder.Id) return BadRequest();
+            _folderService.UpdateFolder(id, folder);
+            return Ok(folder);
         }
 
-
-        //DELETE:
         [HttpDelete("{id}")]
-        public ActionResult DeleteFolder(int id)
+        public IActionResult Delete(int id)
         {
             _folderService.DeleteFolder(id);
             return NoContent();
         }
-
-
-
     }
 }
-
-   
-
-
-   

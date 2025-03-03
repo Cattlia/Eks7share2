@@ -1,81 +1,57 @@
+// Controllers/NotesController.cs
 using E7Kont.Models;
+using E7Kont.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace E7Kont.Controllers
-
-{   
-    [ApiController, Route("api/[controller]")]
+{
+    [Route("api/[controller]")]
+    [ApiController]
     public class NotesController : ControllerBase
     {
-        
-        private readonly INoteService _NoteService;
+        private readonly INoteService _noteService;
 
-        public NotesController(INoteService NoteService)
+        public NotesController(INoteService noteService)
         {
-            _NoteService = NoteService;
+            _noteService = noteService;
         }
 
-        //GET: api/Note
         [HttpGet]
-        public ActionResult<IEnumerable<Note>> GetNote()
+        public IActionResult GetAll()
         {
-            var Note = _NoteService.GetNote();
-            return Ok(Note);
+            var notes = _noteService.GetNotes();
+            return Ok(notes);
         }
 
-        // GET: api/Note/{id}
         [HttpGet("{id}")]
-        public ActionResult<IEnumerable<Note>> GetNote(int id)
+        public IActionResult GetById(int id)
         {
-            var note = _NoteService.GetNoteById(id);
-            if (note == null)
-            {
-                NotFound();
-            }
+            var note = _noteService.GetNoteById(id);
+            if (note == null) return NotFound();
             return Ok(note);
         }
-    
+
         [HttpPost]
-        public ActionResult<Note> CreateNote(Note newNote)
+        public IActionResult Create([FromBody] Note note)
         {
-            //if(!ModelState.IsValid)
-            //{
-            //    return BadRequest(ModelState);
-            //}
-            _NoteService.AddNote(newNote);
-            return CreatedAtAction(nameof(GetNote), new {id = newNote.Id}, newNote);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            _noteService.AddNote(note);
+            return CreatedAtAction(nameof(GetById), new { id = note.Id }, note);
         }
 
-        //PUT: api/Note/{id}
         [HttpPut("{id}")]
-        public ActionResult UpdateNote(int id, Note updatedNote)
+        public IActionResult Update(int id, [FromBody] Note note)
         {
-            var existingNote = _NoteService.GetNoteById(id);
-            if(existingNote == null)
-            {
-                return NotFound();
-            }
-            
-            _NoteService.UpdateNote(id, updatedNote);
-
-            return NoContent();
+            if (!ModelState.IsValid || id != note.Id) return BadRequest();
+            _noteService.UpdateNote(id, note);
+            return Ok(note);
         }
 
-
-        //DELETE:
         [HttpDelete("{id}")]
-        public ActionResult DeleteNote(int id)
+        public IActionResult Delete(int id)
         {
-            _NoteService.DeleteNote(id);
+            _noteService.DeleteNote(id);
             return NoContent();
         }
-
-
-
     }
 }
-
-   
-
-
-   
